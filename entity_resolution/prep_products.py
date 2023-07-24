@@ -22,7 +22,7 @@ def side_col(side, row):
         col = f'{attribute}_{side}'
         if row[col] is None:
             continue
-        out_example.append(f"- {attribute}: {row[col]}")
+        out_example.append(f"{attribute}: {row[col]}")
     return '\n'.join(out_example)
 
 if __name__ == '__main__':

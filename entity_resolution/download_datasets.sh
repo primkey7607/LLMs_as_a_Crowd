@@ -21,4 +21,16 @@ python ${ERDIR}/prep_products.py ${DATADIR}/wdcproducts50cc50rnd050un_gs.json.gz
 rm ${DATADIR}/products.zip ${DATADIR}/wdcproducts50cc50rnd*.json.gz
 
 # WDC LSPM
+# We use the version checked into the ditto repo
+DITTODIR=${ERDIR}/../submodules/ditto
+LSPMSOURCEDIR=${DITTODIR}/data/wdc
+git submodule update --init ${DITTODIR}
 
+for dataset in cameras computers shoes watches
+do
+    for size in small medium large xlarge
+    do
+        python ${ERDIR}/prep_lspm.py ${LSPMSOURCEDIR}/${dataset}/train.txt.${size} ${DATADIR}/train/${dataset}-${size}.csv
+    done
+    python ${ERDIR}/prep_lspm.py ${LSPMSOURCEDIR}/${dataset}/test.txt ${DATADIR}/test/${dataset}.csv
+done
