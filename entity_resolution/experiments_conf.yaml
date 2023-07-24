@@ -1,0 +1,27 @@
+experiments:
+  er_basic:
+    datasets: [products, products_seen, products_half, cameras, computers, shoes, watches]
+  er_fewshot:
+    datasets: [products, products_seen, products_half, cameras, computers, shoes, watches]
+    shots: regular  
+  er_multirep:
+    datasets: [cameras, computers, shoes, watches]
+    reps: 10
+    temperature: 2.0
+  er_multirep_shots:
+    datasets: [cameras, computers, shoes, watches]
+    reps: 10
+    temperature: 2.0
+    shots: regular
+  er_uniform_fewshot:
+    datasets: [computers]
+    reps: 10
+    shots: uniform
+  er_cameras_fewshot:
+    datasets: [computers, shoes, watches]
+    shots: regular
+    shots_dataset: cameras
+  er_cot:
+    datasets: [products]
+    cot: True
+    templates: [baseline]
