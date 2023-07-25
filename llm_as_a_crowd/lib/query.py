@@ -38,7 +38,7 @@ def write_responses(
         out_dir: Path,
         datasets: Dict[str, pd.DataFrame],
         prompt_templates: List[PromptTemplate],
-        examples_func: Callable[[str, int], List[Tuple[Any, Any, Any]],
+        examples_func: Callable[[str, int, int], List[Tuple[Any, Any, Any]],
         num_reps: int = 1):
     '''
     Write a csv file in out_dir for each (prompt template, df, row in df, rep) combination. We write
@@ -46,12 +46,12 @@ def write_responses(
     '''
     os.makedirs(out_dir, exist_ok=True)
 
-    for dataset_name, df in datasets.items():
-        for idx, row in df.iterrows():
-            examples = examples_func(dataset_name, idx)
+    for rep in range(num_reps):
+        for dataset_name, df in datasets.items():
+            for idx, row in df.iterrows():
+                examples = examples_func(dataset_name, idx, rep)
 
-            for template in prompt_templates:
-                for rep in range(num_reps):
+                for template in prompt_templates:
                     fname = out_dir / f'{dataset_name}-{template}-{idx}-{rep}.csv'
                     if fname.exists():
                         print(f"Already exists: {fname} exists...")

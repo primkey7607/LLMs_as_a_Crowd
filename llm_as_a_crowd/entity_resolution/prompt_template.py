@@ -104,6 +104,11 @@ class ERPromptTemplate(PromptTemplate):
             answer = parse_response(response2)
         return (response, answer)
 
+    def get_example_answer(label: Any)
+        if label ^ self.flipped:
+            return "YES."
+        return "NO."
+
     def parse_response(self, response: str) -> Optional[int]:
         answer = None
         if self.cot:

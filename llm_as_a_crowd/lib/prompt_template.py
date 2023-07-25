@@ -25,19 +25,25 @@ class PromptTemplate:
         '''
         pass
 
+    def get_example_answer(label: Any)
+        '''
+        Return the desired string answer for a few-shot example with the given label
+        '''
+        pass
+
     def get_prompt(
             self,
             left: Any,
             right: Any,
-            examples: List[Tuple[Any, Any, str]] = []) -> List[Dict[str, str]]:
+            examples: List[Tuple[str, str, Any]] = []) -> List[Dict[str, str]]:
         '''
         Return a full prompt, possibly with few-shot examples, in OpenAI chat format
         '''
         chat = [{'role': 'system', 'content': system}]
 
-        for ex_left, ex_right, answer in examples:
+        for ex_left, ex_right, label in examples:
             chat.append({'role': 'user', 'content': self.get_base_prompt(ex_left, ex_right)})
-            chat.append({'role': 'assistant', 'content': answer})
+            chat.append({'role': 'assistant', 'content': self.get_example_answer(label)})
 
         chat.append({'role': 'user', 'content': self.get_base_prompt(left, right)})
         # Add preamble to first base prompt, whether an example or the actual prompt

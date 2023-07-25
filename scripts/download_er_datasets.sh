@@ -1,8 +1,9 @@
 # Products
 #!/usr/bin/env bash
 
-ERDIR=$(dirname "$0")
-DATADIR=${ERDIR}/datasets
+ROOTDIR=$(dirname "$0")/..
+ERDIR=${ROOTDIR}/llm_as_a_crowd/entity_resolution
+DATADIR=${ROOTDIR}/data/entity_resolution
 mkdir -p ${DATADIR}/train
 mkdir -p ${DATADIR}/test
 
@@ -22,7 +23,7 @@ rm ${DATADIR}/products.zip ${DATADIR}/wdcproducts50cc50rnd*.json.gz
 
 # WDC LSPM
 # We use the version checked into the ditto repo
-DITTODIR=${ERDIR}/../submodules/ditto
+DITTODIR=${ROOTDIR}/submodules/ditto
 LSPMSOURCEDIR=${DITTODIR}/data/wdc
 git submodule update --init ${DITTODIR}
 
