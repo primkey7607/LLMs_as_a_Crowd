@@ -1,14 +1,14 @@
 import argparse
-import os
 from pathlib import Path
 
 import pandas as pd
 
-from llm_as_a_crowd.lib.experiment_config import experiment_config
-
-ERDIR = Path(os.path.realpath(__file__)).parent
+from llm_crowd.lib.utils import DATADIR
+from llm_crowd.lib.experiment_config import experiment_config
 
 NUM_SHOTS = 2
+
+ERDIR = DATADIR / 'entity_resolution'
 
 def load_datasets(exp_conf):
     return {d: pd.read_csv(ERDIR / 'test' / f"{d}.csv") for d in exp_conf['datasets']}
