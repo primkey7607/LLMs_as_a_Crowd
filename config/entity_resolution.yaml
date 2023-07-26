@@ -7,6 +7,9 @@ default_experiment:
     temperature: 0.0
     templates: [baseline, customer, detective, journalist, layperson, plain, security, veryplain]
 experiments:
+  er_example:
+    datasets: [cameras]
+    templates: [veryplain]
   er_basic: {}
   er_fewshot:
     shots: regular

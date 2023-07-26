@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Tuple
 import openai
 import pandas as pd
 
+from llm_crowd.lib.utils import ROOTDIR
 from llm_crowd.lib.prompt_template import PromptTemplate
 
 class MyTimeoutException(Exception):
@@ -58,7 +59,7 @@ def combine_responses(in_dir: Path, out_file: Path):
     big_dfs = []
     counter = 0
     print("Fixing newlines...")
-    os.system(f"bash ./fix_newline.sh {in_dir}")
+    os.system(f"bash {ROOTDIR}/scripts/fix_newline.sh {in_dir}")
     for f in Path(in_dir).glob(f'*.csv'):
         df = pd.read_csv(f)
         small_dfs.append(df)

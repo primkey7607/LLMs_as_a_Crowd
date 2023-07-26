@@ -76,11 +76,10 @@ def examples_funcs(shots_datasets):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", required=True)
     parser.add_argument("experiment")
     args = parser.parse_args()
 
-    exp_conf = experiment_config(args.config, args.experiment)
+    exp_conf = experiment_config('entity_resolution', args.experiment)
 
     exp_dir = Path(ROOTDIR / 'out' / 'entity_resolution' / args.experiment)
     raw_dir = exp_dir / 'raw'

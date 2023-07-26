@@ -1,10 +1,12 @@
 import yaml
 
-def experiment_config(conf_file, experiment):
+from llm_crowd.lib.utils import CONFDIR
+
+def experiment_config(task, experiment):
     '''
     Load experiment settings from config YAML file
     '''
-    with open(conf_file) as cf:
+    with open(CONFDIR / f'{task}.yaml') as cf:
         conf = yaml.safe_load(cf)
 
     if experiment not in conf['experiments']:
