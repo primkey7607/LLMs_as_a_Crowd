@@ -1,8 +1,11 @@
-from ..lib.prompt_template import PromptTemplate
+from typing import Any, List, Optional, Tuple
+
+from llm_crowd.lib.chatgpt import chatgpt
+from llm_crowd.lib.prompt_template import PromptTemplate
 
 TEMPLATES = {
     'baseline': {
-        'preamble': "We are trying to integrate product data from two different databases. The goal is to look at two product entries, one from each database, and determine whether the two entries refer to the same product or not. Since the databases are different, there will still be some differences between entries that refer to the same product."
+        'preamble': "We are trying to integrate product data from two different databases. The goal is to look at two product entries, one from each database, and determine whether the two entries refer to the same product or not. Since the databases are different, there will still be some differences between entries that refer to the same product.",
         'sentence1': "Here is an entry from the first database:",
         'sentence2': "Here is an entry from the second database:",
         'question': "As best as you can tell, do these entries refer to the same product?",
@@ -17,7 +20,7 @@ TEMPLATES = {
     'detective': {
         'preamble': "Suppose you're a detective who has been hired to detect illegal copies of products so that law enforcement can fine those selling these copies.",
         'sentence1': "Suppose you are given the following information about a product that a business may be trying to sell illegally:",
-        'sentence2': "You confront the storefront owner potentially selling the illegal copy. You find the following information:"
+        'sentence2': "You confront the storefront owner potentially selling the illegal copy. You find the following information:",
         'question': "Based on the available information, is it likely that the storefront owner is selling an illegal copy of the product?",
     },
     'journalist': {
@@ -53,37 +56,32 @@ TEMPLATES = {
 }
 
 class ERPromptTemplate(PromptTemplate):
-    def __init__(
-        self,
-        template_name: str,
-        cot: bool,
-        temperature: float,
-    )
-    if template_name not in TEMPLATES:
-        raise ValueError(f"Unrecognized template name {template_name}")
+    def __init__(self, template_name: str, cot: bool, temperature: float):
+        if template_name not in TEMPLATES:
+            raise ValueError(f"Unrecognized template name {template_name}")
     
-    followup = "Please answer in a single word (YES or NO). If you are uncertain, make your best guess."
-    if cot:
-        system = "You are a helpful assistant who thinks step-by-step and then gives final yes or no answers."
-        question_ending = "\n\nAnswer: Let's think step-by-step."
-        followup = "What is your final answer? " + followup
-    else:
-        system = "You are a helpful assistant who can only answer YES or NO and then explain your reasoning."
-        question_ending = " Begin your answer with YES or NO."
+        followup = "Please answer in a single word (YES or NO). If you are uncertain, make your best guess."
+        if cot:
+            system = "You are a helpful assistant who thinks step-by-step and then gives final yes or no answers."
+            question_ending = "\n\nAnswer: Let's think step-by-step."
+            followup = "What is your final answer? " + followup
+        else:
+            system = "You are a helpful assistant who can only answer YES or NO and then explain your reasoning."
+            question_ending = " Begin your answer with YES or NO."
 
-    template = TEMPLATES[template_name]
-    super().__init__
-        template_name,
-        system,
-        template['preamble'],
-        template['sentence1'],
-        template['sentence2'],
-        template['question'] + question_ending,
-    )
+        template = TEMPLATES[template_name]
+        super().__init__(
+            template_name,
+            system,
+            template['preamble'],
+            template['sentence1'],
+            template['sentence2'],
+            template['question'] + question_ending,
+        )
         
-    self.cot = cot
-    self.temperature = temperature
-    self.flipped = (template_name == 'customer')
+        self.cot = cot
+        self.temperature = temperature
+        self.flipped = (template_name == 'customer')
 
     def get_response(
             self,
@@ -93,7 +91,7 @@ class ERPromptTemplate(PromptTemplate):
         prompt = self.get_prompt(left[:1000], right[:1000], examples)
         max_tokens = 300 if self.cot else 30
         response = chatgpt(prompt, self.temperature, max_tokens)
-        answer = parse_response(response)
+        answer = self.parse_response(response)
         if answer is None:
             prompt.append({'role': 'assistant', 'content': response})
             followup = "Please answer in a single word (YES or NO). If you are uncertain, make your best guess."
@@ -101,10 +99,10 @@ class ERPromptTemplate(PromptTemplate):
                 followup = f"What is your final answer? {followup}"
             prompt.append({'role': 'user', 'content': followup})
             response2 = chatgpt(prompt, self.temperature, 5)
-            answer = parse_response(response2)
+            answer = self.parse_response(response2)
         return (response, answer)
 
-    def get_example_answer(label: Any)
+    def get_example_answer(label: Any):
         if label ^ self.flipped:
             return "YES."
         return "NO."

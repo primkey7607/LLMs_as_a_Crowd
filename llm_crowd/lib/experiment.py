@@ -1,30 +1,11 @@
-import pandas as pd
-import openai
-import signal
-import argparse
-from dotenv import load_dotenv
 import os
 from pathlib import Path
-from googletrans import Translator
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_random_exponential,
-    retry_if_exception_type
-)  # for exponential backoff
-from prompt_generator import TEMPLATES
+from typing import Any, Callable, Dict, List, Tuple
 
-STORIES = ['baseline', 'plain', 'veryplain', 'customer', 'journalist', 'security', 'layperson', 'detective']
-DATASETS = ['cameras', 'computers', 'shoes', 'watches']
-ALL_DATASETS = DATASETS + ['Amazon-Google', 'wdc_seen', 'wdc_half', 'wdc_unseen', 'wdc']
+import openai
+import pandas as pd
 
-'''
-Purpose: Run multiple prompts with multiple temperatures,
-and figure out which configuration is best for entity resolution. We also have functions
-to analyze the results and figure out which configuration will give
-the best performance.
-    
-'''
+from llm_crowd.lib.prompt_template import PromptTemplate
 
 class MyTimeoutException(Exception):
     pass
@@ -38,7 +19,7 @@ def write_responses(
         out_dir: Path,
         datasets: Dict[str, pd.DataFrame],
         prompt_templates: List[PromptTemplate],
-        examples_func: Callable[[str, int, int], List[Tuple[Any, Any, Any]],
+        examples_func: Callable[[str, int, int], List[Tuple[Any, Any, Any]]],
         num_reps: int = 1):
     '''
     Write a csv file in out_dir for each (prompt template, df, row in df, rep) combination. We write
@@ -52,7 +33,7 @@ def write_responses(
                 examples = examples_func(dataset_name, idx, rep)
 
                 for template in prompt_templates:
-                    fname = out_dir / f'{dataset_name}-{template}-{idx}-{rep}.csv'
+                    fname = out_dir / f'{dataset_name}-{template.name}-{idx}-{rep}.csv'
                     if fname.exists():
                         print(f"Already exists: {fname} exists...")
                         continue
@@ -68,3 +49,29 @@ def write_responses(
                         'answer': [answer],
                         'truth': row['label']})
                     out_df.to_csv(fname, index=False)
+
+def combine_responses(in_dir: Path, out_file: Path):
+    '''
+    Combine csv files from write_responses into a single file
+    '''
+    small_dfs = []
+    big_dfs = []
+    counter = 0
+    print("Fixing newlines...")
+    os.system(f"bash ./fix_newline.sh {in_dir}")
+    for f in Path(in_dir).glob(f'*.csv'):
+        df = pd.read_csv(f)
+        small_dfs.append(df)
+        if len(df) > 1:
+            raise ValueError(f"Invalid file: {f}")
+        counter += 1
+        if counter % 1000 == 0:
+            print(f'{counter}...')
+            big_dfs.append(pd.concat(small_dfs))
+            small_dfs = []
+    print("Concatting...")
+    df = pd.concat(big_dfs + small_dfs)
+    print("Writing...")
+    df.to_csv(out_file, index=False)
+
+    

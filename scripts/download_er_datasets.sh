@@ -2,7 +2,7 @@
 #!/usr/bin/env bash
 
 ROOTDIR=$(dirname "$0")/..
-ERDIR=${ROOTDIR}/llm_as_a_crowd/entity_resolution
+ERDIR=${ROOTDIR}/llm_crowd/entity_resolution
 DATADIR=${ROOTDIR}/data/entity_resolution
 mkdir -p ${DATADIR}/train
 mkdir -p ${DATADIR}/test

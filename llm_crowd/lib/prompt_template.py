@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Tuple
+
 class PromptTemplate:
     def __init__(
             self,
@@ -8,7 +10,7 @@ class PromptTemplate:
             sentence2: str,
             question: str,
     ):
-        self.name = template_name
+        self.name = name
         self.system = system
         self.preamble = preamble
         self.sentence1 = sentence1
@@ -25,7 +27,7 @@ class PromptTemplate:
         '''
         pass
 
-    def get_example_answer(label: Any)
+    def get_example_answer(label: Any) -> str:
         '''
         Return the desired string answer for a few-shot example with the given label
         '''
@@ -39,7 +41,7 @@ class PromptTemplate:
         '''
         Return a full prompt, possibly with few-shot examples, in OpenAI chat format
         '''
-        chat = [{'role': 'system', 'content': system}]
+        chat = [{'role': 'system', 'content': self.system}]
 
         for ex_left, ex_right, label in examples:
             chat.append({'role': 'user', 'content': self.get_base_prompt(ex_left, ex_right)})

@@ -5,7 +5,7 @@ default_experiment:
     cot: False
     reps: 1
     temperature: 0.0
-    templates: [baseline, customer, detective, journalist, layman, plain, security, veryplain]
+    templates: [baseline, customer, detective, journalist, layperson, plain, security, veryplain]
 experiments:
   er_basic: {}
   er_fewshot:

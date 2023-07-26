@@ -3,14 +3,16 @@ from pathlib import Path
 
 import pandas as pd
 
-from llm_crowd.lib.utils import DATADIR
+from llm_crowd.lib.utils import ROOTDIR, DATADIR
 from llm_crowd.lib.experiment_config import experiment_config
+from llm_crowd.lib.experiment import write_responses, combine_responses
+from llm_crowd.entity_resolution.prompt_template import ERPromptTemplate
 
 NUM_SHOTS = 2
 
 ERDIR = DATADIR / 'entity_resolution'
 
-def load_datasets(exp_conf):
+def load_testsets(exp_conf):
     return {d: pd.read_csv(ERDIR / 'test' / f"{d}.csv") for d in exp_conf['datasets']}
 
 def load_shots_datasets(exp_conf, size='small'):
@@ -33,7 +35,7 @@ def load_shots_dataset(dataset, size='small'):
 
 def init_templates(exp_conf):
     return [
-        ERPromtTemplate(t, exp_conf['cot'], exp_conf['temperature'])
+        ERPromptTemplate(t, exp_conf['cot'], exp_conf['temperature'])
         for t in exp_conf['templates']]
 
 def examples_funcs(shots_datasets):
@@ -80,14 +82,16 @@ if __name__ == '__main__':
 
     exp_conf = experiment_config(args.config, args.experiment)
 
-    out_dir = Path(ERDIR / 'experiments' / args.experiment / 'raw')
-    out_dir.mkdir(parents=True, exist_ok=True)
+    exp_dir = Path(ROOTDIR / 'out' / 'entity_resolution' / args.experiment)
+    raw_dir = exp_dir / 'raw'
+    raw_dir.mkdir(parents=True, exist_ok=True)
 
     datasets = load_testsets(exp_conf)
 
     prompt_templates = init_templates(exp_conf)
 
-    shots_datasets = load_trainsets(exp_conf)
+    shots_datasets = load_shots_datasets(exp_conf)
     examples_func = examples_funcs(shots_datasets)[exp_conf['shots']]
 
-    write_responses(out_dir, datasets, prompt_templates, exp_conf['reps'])
+    write_responses(raw_dir, datasets, prompt_templates, examples_func, exp_conf['reps'])
+    combine_responses(raw_dir, exp_dir / 'responses.csv')

@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 import openai
 import signal
 from tenacity import (
