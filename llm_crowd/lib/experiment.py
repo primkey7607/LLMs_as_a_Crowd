@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Tuple
 import openai
 import pandas as pd
 
-from llm_crowd.lib.utils import ROOTDIR
+from llm_crowd.lib.utils import ROOTDIR, DATADIR
 from llm_crowd.lib.prompt_template import PromptTemplate
 
 class MyTimeoutException(Exception):
@@ -17,16 +17,20 @@ def handler(signum, frame):
     raise MyTimeoutException("STOP")
 
 def write_responses(
-        out_dir: Path,
+        task: str,
+        experiment: str,
         datasets: Dict[str, pd.DataFrame],
         prompt_templates: List[PromptTemplate],
         examples_func: Callable[[str, int, int], List[Tuple[Any, Any, Any]]],
         num_reps: int = 1):
     '''
-    Write a csv file in out_dir for each (prompt template, df, row in df, rep) combination. We write
-    separate files so experiments can be parallelized and so errors don't make us lose progress.
+    Write a csv file for each (prompt template, df, row in df, rep) combination in the
+    corresponding experiment directory. We write separate files so experiments can be parallelized
+    and so errors don't make us lose progress (if a file already exists, we don't redo the query).
     '''
-    os.makedirs(out_dir, exist_ok=True)
+    exp_dir = experiment_dir(task, experiment)
+    out_dir = exp_dir / 'raw'
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     for rep in range(num_reps):
         for dataset_name, df in datasets.items():
@@ -51,10 +55,12 @@ def write_responses(
                         'truth': row['label']})
                     out_df.to_csv(fname, index=False)
 
-def combine_responses(in_dir: Path, out_file: Path):
+def combine_responses(task: str, experiment: str):
     '''
     Combine csv files from write_responses into a single file
     '''
+    exp_dir = experiment_dir(task, experiment)
+    in_dir = exp_dir / 'raw'
     small_dfs = []
     big_dfs = []
     counter = 0
@@ -73,6 +79,20 @@ def combine_responses(in_dir: Path, out_file: Path):
     print("Concatting...")
     df = pd.concat(big_dfs + small_dfs)
     print("Writing...")
-    df.to_csv(out_file, index=False)
+    df.to_csv(exp_dir / 'responses.csv', index=False)
 
-    
+def task_dir(task):
+    return ROOTDIR / 'out' / task
+
+def experiment_dir(task, experiment):
+    return ROOTDIR / 'out' / task / experiment
+
+def train_df(task, dataset, size=None):
+    if size is None:
+        fname = f'{dataset}.csv'
+    else:
+        fname = f'{dataset}-{size}.csv'
+    return pd.read_csv(DATADIR / task / 'train' / fname)
+
+def test_df(task, dataset):
+    return pd.read_csv(DATADIR / task / 'test' / f'{dataset}.csv')

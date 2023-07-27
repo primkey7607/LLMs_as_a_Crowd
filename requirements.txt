@@ -1,5 +1,7 @@
+crowd-kit
 numpy
 openai
 pandas
 pyyaml
+scikit-learn
 tenacity

@@ -4,8 +4,10 @@ default_experiment:
     shots_dataset: null
     cot: False
     reps: 1
+    reps_separate: False
     temperature: 0.0
     templates: [baseline, customer, detective, journalist, layperson, plain, security, veryplain]
+    crowd_methods: [DawidSkene]
 experiments:
   er_example:
     datasets: [cameras]
@@ -13,6 +15,7 @@ experiments:
   er_basic: {}
   er_fewshot:
     shots: regular
+    crowd_methods: [MajorityVote, Wawa, DawidSkene, GLAD, EBCC, BWA, GoldStandard]
   er_multirep:
     datasets: [cameras, computers, shoes, watches]
     reps: 10
@@ -25,6 +28,7 @@ experiments:
   er_uniform_fewshot:
     datasets: [computers]
     reps: 10
+    reps_separate: True
     shots: uniform
   er_cameras_fewshot:
     datasets: [computers, shoes, watches]

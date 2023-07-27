@@ -22,7 +22,10 @@ python llm_crowd/entity_resolution/query.py er_basic
 
 Then, to produce F1 scores and other metrics:
 ```
-python llm_crowd/lib/analyze.py entity_resolution # TODO
+python llm_crowd/lib/analyze.py entity_resolution
+```
+
+See the `out` directory for the results.
 
 
 Still a work-in-progress. The idea is to share as much code as possible in libs, and any task-specific code can go in a folder like entity_resolution.
