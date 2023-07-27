@@ -2,6 +2,8 @@ crowd-kit
 numpy
 openai
 pandas
+pingouin
 pyyaml
 scikit-learn
+scipy
 tenacity

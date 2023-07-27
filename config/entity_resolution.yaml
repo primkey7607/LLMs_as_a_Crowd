@@ -8,14 +8,18 @@ default_experiment:
     temperature: 0.0
     templates: [baseline, customer, detective, journalist, layperson, plain, security, veryplain]
     crowd_methods: [DawidSkene]
+    extra_analysis: []
 experiments:
   er_example:
     datasets: [cameras]
     templates: [veryplain]
-  er_basic: {}
+    extra_analysis: [correlations]
+  er_basic:
+    extra_analysis: [correlations]
   er_fewshot:
     shots: regular
     crowd_methods: [MajorityVote, Wawa, DawidSkene, GLAD, EBCC, BWA, GoldStandard]
+    extra_analysis: [correlations]
   er_multirep:
     datasets: [cameras, computers, shoes, watches]
     reps: 10
@@ -30,6 +34,7 @@ experiments:
     reps: 10
     reps_separate: True
     shots: uniform
+    extra_analysis: [stdev]
   er_cameras_fewshot:
     datasets: [computers, shoes, watches]
     shots: regular

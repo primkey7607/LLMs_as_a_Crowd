@@ -1,9 +1,12 @@
-import numpy as np
-import pandas as pd
-import sklearn
-import yaml
 import argparse
 from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import pingouin
+from scipy import stats
+import sklearn
+import yaml
 
 from llm_crowd.lib.crowd_methods import CROWD_METHODS
 from llm_crowd.lib.experiment import task_dir, experiment_dir
@@ -34,14 +37,29 @@ def main(task: str):
                 dfs[f'{exp}_{rep}'] = rep_df
         else:
             dfs = {exp: df}
-        for sub_exp, df in dfs.items():
-            template_f1s = calculate_template_f1s(df, truth)
-            template_f1s['experiment'] = sub_exp
-            template_dfs.append(template_f1s)
 
-            crowd_f1s = calculate_crowd_f1s(df, truth, conf['crowd_methods'])
+        exp_template_dfs = []
+        exp_crowd_dfs = []
+        for sub_exp, sub_df in dfs.items():
+            template_f1s = calculate_template_f1s(sub_df, truth)
+            template_f1s['experiment'] = sub_exp
+            exp_template_dfs.append(template_f1s)
+
+            crowd_f1s = calculate_crowd_f1s(sub_df, truth, conf['crowd_methods'])
             crowd_f1s['experiment'] = sub_exp
-            crowd_dfs.append(crowd_f1s)
+            exp_crowd_dfs.append(crowd_f1s)
+        template_dfs += exp_template_dfs
+        crowd_dfs += exp_crowd_dfs
+
+        if 'correlations' in conf['extra_analysis']:
+            df_corrs = independence_partial_correlations(df, truth)
+            df_corrs.to_csv(exp_dir / 'corrs.csv', index=False)
+        if 'stdev' in conf['extra_analysis']:
+            exp_template_df = pd.concat(exp_template_dfs)
+            exp_crowd_df = pd.concat(exp_crowd_dfs)
+            stdev_df = standard_deviations(exp_template_df, exp_crowd_df)
+            stdev_df.to_csv(exp_dir / 'stdevs.csv', index=False)
+            
 
     template_df = pd.concat(template_dfs)[['experiment', 'dataset', 'template', 'F1']]
     crowd_df = pd.concat(crowd_dfs)[['experiment', 'dataset', 'method', 'F1']]
@@ -88,6 +106,47 @@ def calculate_crowd_f1s(df, truth, methods):
     out = pd.DataFrame(out)
     return out
 
+
+def independence_partial_correlations(df, truth):
+    '''
+    Return DF with a row for each worker pair, with the conditional independence and partial
+    correlations (controlling for true label) reported
+    '''
+    df2 = df.copy()
+    df2['template'] = 'vp2'
+    df = pd.concat([df, df2])
+    templates = df['template'].unique()
+    
+    df_pivot = df.pivot(columns='template', index=['dataset', 'row'], values='answer').reset_index()
+    df_pivot = df_pivot.merge(truth, on=['dataset', 'row'])
+
+    df_true = df_pivot[df_pivot['truth'] == 1]
+    df_false = df_pivot[df_pivot['truth'] == 0]
+
+    out = {'template1': [], 'template2': [], 'chi2_stat': [], 'partial_corr': []}
+
+    for i in range(len(templates)):
+        t1 = templates[i]
+        for j in range(i+1, len(templates)):
+            t2 = templates[j]
+
+            test_stat = min(independence_test(df_true, t1, t2), independence_test(df_false, t1, t2))
+            corr = df_pivot.partial_corr(x=t1, y=t2, covar='truth').loc['pearson', 'r']
+            out['template1'].append(t1)
+            out['template2'].append(t2)
+            out['chi2_stat'].append(test_stat)
+            out['partial_corr'].append(corr)
+
+    return pd.DataFrame(out)
+
+def independence_test(df, col1, col2):
+    res = stats.chi2_contingency(pd.crosstab(df[col1], df[col2]))
+    return res[1]
+
+def standard_deviations(template_df, crowd_df):
+    df = pd.concat(template_df.rename(columns={'template': 'method'}), crowd_df)
+    df = df.groupby(['dataset', 'method'])['F1'].std().reset_index()
+    return df.rename(columns={'F1': 'F1_stdev'})
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
