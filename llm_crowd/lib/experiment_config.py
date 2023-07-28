@@ -20,3 +20,11 @@ def all_experiment_configs(task: str):
     return {
         exp: {**conf['default_experiment'], **exp_conf}
         for exp, exp_conf in conf['experiments'].items()}
+
+def custom_crowds(task: str):
+    with open(CONFDIR / f'{task}.yaml') as cf:
+        conf = yaml.safe_load(cf)
+
+    if 'custom_crowds' in conf:
+        return conf['custom_crowds']
+    return {}

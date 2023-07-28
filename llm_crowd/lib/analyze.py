@@ -10,7 +10,7 @@ import yaml
 
 from llm_crowd.lib.crowd_methods import CROWD_METHODS
 from llm_crowd.lib.experiment import task_dir, experiment_dir
-from llm_crowd.lib.experiment_config import all_experiment_configs
+from llm_crowd.lib.experiment_config import all_experiment_configs, custom_crowds
 
 
 def main(task: str):
@@ -59,7 +59,37 @@ def main(task: str):
             exp_crowd_df = pd.concat(exp_crowd_dfs)
             stdev_df = standard_deviations(exp_template_df, exp_crowd_df)
             stdev_df.to_csv(exp_dir / 'stdevs.csv', index=False)
-            
+
+    for crowd, content in custom_crowds(task).items():
+        for exp in content['experiments'].keys():
+            datasets = None
+            if exp not in finished_experiments:
+                break
+            conf = experiment_config(task, exp)
+            if datasets is None:
+                datasets = set(conf['datasets'])
+            else:
+                datasets &= set(conf['datasets'])
+                if not datasets:
+                    break
+        else:
+
+            custom_crowd_dfs = []
+            for exp, templates in content['experiments'].items():
+                exp_dir = experiment_dir(task, exp)
+                infile = exp_dir / 'responses.csv'
+                df = pd.read_csv(infile, usecols=['template', 'dataset', 'row', 'rep', 'answer', 'truth'])
+                df[df['template'].isin(templates) & df['dataset'].isin(datasets)]
+                df['template'] = exp + '-' + df['template']
+                custom_crowd_dfs.append(df[df['template'].isin(templates) & df['dataset'].isin(datasets)])
+            custom_crowd_df = pd.concat(custom_crowd_dfs)
+            custom_crowd_truth = custom_crowd_df.groupby(['dataset', 'row'])['truth'].mean().astype(int).reset_index()
+            custom_crowd_df = custom_crowd_df.drop(columns=['truth'])
+            custom_crowd_df.loc[custom_crowd_df['answer'] == -1, 'answer'] = 0
+
+            custom_crowd_f1s = calculate_crowd_f1s(custom_crowd_df, custom_crowd_truth, content['crowd_methods'])
+            custom_crowd_f1s['experiment'] = crowd
+            crowd_dfs.append(custom_crowd_f1s)
 
     template_df = pd.concat(template_dfs)[['experiment', 'dataset', 'template', 'F1']]
     crowd_df = pd.concat(crowd_dfs)[['experiment', 'dataset', 'method', 'F1']]

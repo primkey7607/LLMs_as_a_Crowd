@@ -43,3 +43,17 @@ experiments:
     datasets: [products]
     cot: True
     templates: [baseline]
+  er_cot_fewshot:
+    datasets: [products]
+    cot: True
+    shots: uniform
+    templates: [baseline]
+custom_crowds:
+    er_custom_cot:
+        experiments:
+            er_basic: [baseline]
+            er_fewshot: [baseline]
+            er_cot: [baseline]
+            #er_cot_fewshot: [baseline]
+        crowd_methods: [MajorityVote, Wawa, DawidSkene, GLAD, EBCC, BWA, GoldStandard]
+            
