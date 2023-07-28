@@ -10,10 +10,6 @@ default_experiment:
     crowd_methods: [DawidSkene]
     extra_analysis: []
 experiments:
-  er_example:
-    datasets: [cameras]
-    templates: [veryplain]
-    extra_analysis: [correlations]
   er_basic:
     extra_analysis: [correlations]
   er_fewshot:
