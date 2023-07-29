@@ -1,3 +1,6 @@
 [submodule "submodules/ditto"]
 	path = submodules/ditto
 	url = https://github.com/megagonlabs/ditto
+[submodule "submodules/aurum-datadiscovery"]
+	path = submodules/aurum-datadiscovery
+	url = https://github.com/mitdbg/aurum-datadiscovery.git
