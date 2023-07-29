@@ -4,3 +4,6 @@
 [submodule "submodules/aurum-datadiscovery"]
 	path = submodules/aurum-datadiscovery
 	url = https://github.com/mitdbg/aurum-datadiscovery.git
+[submodule "submodules/santos"]
+	path = submodules/santos
+	url = https://github.com/northeastern-datalab/santos.git
