@@ -57,7 +57,7 @@ python llm_crowd/joinability/join_experiments.py
 For both experiments, you can add the option ``--shots`` to add the few-shot examples described in the paper.
 
 ## Unionability
-All code necessary to reproduce our joinability experiments in Section 5.3 are in the folder `llm_crowd/joinability`.
+All code necessary to reproduce our joinability experiments in Section 5.3 are in the folder `llm_crowd/unionability`.
 
 First, follow instructions to generate SANTOS results for ``santos_small`` and ``TUS`` datasets here: https://github.com/northeastern-datalab/santos
 
