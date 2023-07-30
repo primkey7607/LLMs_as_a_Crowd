@@ -27,6 +27,8 @@ python llm_crowd/lib/analyze.py entity_resolution
 
 See the `out` directory for the results.
 
+Based on our entity resolution findings, we use the best method, which is the few-shot crowd, for joinability and unionability. We provide scripts to run experiments on each of these tasks as explained below.
+
 ## Joinability
 
 All code necessary to reproduce our joinability experiments in Section 5.3 are in the folder `llm_crowd/joinability`.
