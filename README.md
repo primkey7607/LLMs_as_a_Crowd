@@ -13,7 +13,7 @@ pip install -e .
 
 ## Entity Resolution
 
-The list of configured experiments is in `config/entity_resolution.yaml`. Below is how to run the `er_basic` experiment:
+The list of configured experiments is in `config/entity_resolution.yaml`, which contains all the experiments necessary to reproduce our results in Section 5.1. As an example, below is how to run the `er_basic` experiment:
 ```
 export OPENAI_API_KEY=<API key>
 ./scripts/download_er_datasets.sh
