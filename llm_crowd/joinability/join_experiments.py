@@ -1,8 +1,10 @@
+import argparse
 import pandas as pd
 import pickle
 import openai
 import signal
 import os
+import shutil
 from postprocessing_prompts import JoinPrompt
 from crowdkit.aggregation import MajorityVote, Wawa, DawidSkene
 from googletrans import Translator
@@ -693,10 +695,18 @@ def crowd_only(fulldf, maindf, temp, itr_num=None):
     ds_df.to_csv(ds_name, index=False)
     return {'MajorityVote' : mv_df, 'Wawa' : wawa_df, 'DawidSkene' : ds_df}
 
+def move_results(dirname):
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    
+    for f in os.listdir():
+        if f.startswith('joinmatchwsuff') and f.endswith('.csv'):
+            shutil.move(f, os.path.join(dirname, f))
+
 if __name__=='__main__':
     chembl_strs = {}
-    for f in os.listdir('../join_data/chembl_csvs'):
-        fpath = os.path.join('/home/cc/join_data/chembl_csvs', f)
+    for f in os.listdir('../chembl_csvs'):
+        fpath = os.path.join('../chembl_csvs', f)
         if fpath.endswith('.csv'):
             tbl_str = pd.read_csv(fpath, nrows=3).to_csv()
             chembl_strs[f] = tbl_str
@@ -708,10 +718,21 @@ if __name__=='__main__':
     inp_tbls = pd.read_csv(candfile)['Input Table'].unique().tolist()
     stories = ['plain', 'accountant', 'mleng', 'lost', 'fk']
     join_examples = construct_fewshot()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--shots')
+    args = parser.parse_args()
+    few_shot = True
+    if args.shots is None:
+        few_shot = False
+        
     for s in stories:
-        storysuff_fewshot(inp_tbls, candfile, s, [0.0], 'temperature', join_examples, num_reps=1)
+        if few_shot:
+            storysuff_fewshot(inp_tbls, candfile, s, [0.0], 'temperature', join_examples, num_reps=1)
+        else:
+            storysuff(inp_tbls, candfile, s, [0.0], 'temperature', join_examples, num_reps=1)
     # storyfirst(inp_tbls, candfile, stories, [2.0], 'temperature')
-    # combine_storiesresults(candfile, 'joincomplete')
+    move_results('joincomplete')
+    combine_storiesresults(candfile, 'joincomplete')
     # crowd_gather('joincomplete_full.csv', candfile, 0.0)
     # crowd_gather('joincomplete_full.csv', candfile, 1.0)
     # crowd_gather('joincomplete_full.csv', candfile, 2.0)
@@ -720,9 +741,9 @@ if __name__=='__main__':
     # perprompt_majorities('chemblresults_sample.csv', 1.0)
     # perprompt_majorities('joincomplete_full.csv', 2.0)
     
-    # method_names = ['MajorityVote', 'Wawa', 'DawidSkene']
+    method_names = ['MajorityVote', 'Wawa', 'DawidSkene']
     # temps = [0.0, 1.0, 2.0]
     
     # # get_stats(method_names, temps, stories)
-    # analyze('joincomplete_full.csv', candfile, [0.0], stories, method_names)
+    analyze('joincomplete_full.csv', candfile, [0.0], stories, method_names)
     
