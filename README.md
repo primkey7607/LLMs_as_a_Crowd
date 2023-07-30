@@ -1,4 +1,4 @@
-# LLMs_as_a_Crowd
+# LLMs as a Crowd
 
 ## Setup
 Python 3.8, venv or conda recommended.
