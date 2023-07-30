@@ -3,7 +3,7 @@ import pickle
 import openai
 import signal
 import os
-from joinraw_prompts import JoinRawPrompt
+from tablesonly_prompts import JoinRawPrompt
 from crowdkit.aggregation import MajorityVote, Wawa, DawidSkene
 from googletrans import Translator
 from tenacity import (
