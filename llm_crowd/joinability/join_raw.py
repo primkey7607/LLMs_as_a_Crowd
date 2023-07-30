@@ -695,8 +695,8 @@ def crowd_only(fulldf, maindf, temp, itr_num=None):
 
 if __name__=='__main__':
     chembl_strs = {}
-    for f in os.listdir('../join_data/chembl_csvs'):
-        fpath = os.path.join('/home/cc/join_data/chembl_csvs', f)
+    for f in os.listdir('../chembl_csvs'):
+        fpath = os.path.join('../chembl_csvs', f)
         if fpath.endswith('.csv'):
             tbl_str = pd.read_csv(fpath, nrows=2).to_csv()
             chembl_strs[f] = tbl_str
@@ -705,7 +705,7 @@ if __name__=='__main__':
     # inp_tbls = os.listdir('../join_data/chembl_csvs')
     # inp_tbls = ['assays.csv', 'formulations.csv', 'drug_mechanism.csv', 'activities.csv', 'compound_properties.csv']
     # inp_tbls = ['assays.csv', 'drug_mechanism.csv']
-    candfile = 'chembl_half_halfv2.csv'
+    candfile = 'chembl_half_half.csv'
     inp_tbls = pd.read_csv(candfile)['Input Table'].unique().tolist()
     stories = ['plain', 'accountant', 'mleng', 'lost', 'fk']
     join_examples = construct_fewshot()
