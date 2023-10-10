@@ -27,6 +27,9 @@ def main(experiment):
         exp_conf['reps'])
     combine_responses('entity_resolution', experiment)
 
+def load_testsets(exp_conf):
+    return {d: test_df('entity_resolution', d) for d in exp_conf['datasets']}
+
 def load_shots_datasets(exp_conf, size='small'):
     if exp_conf['shots'] == 'none':
         return {}
