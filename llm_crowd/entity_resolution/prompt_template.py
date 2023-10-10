@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Tuple
 
-from llm_crowd.lib.chatgpt import chatgpt
+from llm_crowd.lib.llm import llm
 from llm_crowd.lib.prompt_template import PromptTemplate
 
 TEMPLATES = {
@@ -85,12 +85,13 @@ class ERPromptTemplate(PromptTemplate):
 
     def get_response(
             self,
+            model: str,
             left: str,
             right: str,
             examples: List[Tuple[str, str, Any]] = []) -> Tuple[str, Any]:
         prompt = self.get_prompt(left[:1000], right[:1000], examples)
         max_tokens = 300 if self.cot else 30
-        response = chatgpt(prompt, self.temperature, max_tokens)
+        response = llm(model, prompt, self.temperature, max_tokens)
         answer = self.parse_response(response)
         if answer is None:
             prompt.append({'role': 'assistant', 'content': response})
@@ -98,7 +99,7 @@ class ERPromptTemplate(PromptTemplate):
             if self.cot:
                 followup = f"What is your final answer? {followup}"
             prompt.append({'role': 'user', 'content': followup})
-            response2 = chatgpt(prompt, self.temperature, 5)
+            response2 = llm(model, prompt, self.temperature, 5)
             answer = self.parse_response(response2)
         return (response, answer)
 

@@ -19,6 +19,7 @@ def handler(signum, frame):
 def write_responses(
         task: str,
         experiment: str,
+        model: str,
         datasets: Dict[str, pd.DataFrame],
         prompt_templates: List[PromptTemplate],
         examples_func: Callable[[str, int, int], List[Tuple[Any, Any, Any]]],
@@ -43,7 +44,7 @@ def write_responses(
                         print(f"Already exists: {fname} exists...")
                         continue
                     print(f"Querying: {fname}")
-                    response, answer = template.get_response(row['left'], row['right'], examples)
+                    response, answer = template.get_response(model, row['left'], row['right'], examples)
 
                     out_df = pd.DataFrame({
                         'template': [template.name],

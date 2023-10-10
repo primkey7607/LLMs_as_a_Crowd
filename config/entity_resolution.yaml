@@ -1,5 +1,6 @@
 default_experiment:
     datasets: [products, products_seen, products_half, cameras, computers, shoes, watches]
+    model: chatgpt
     shots: none
     shots_dataset: null
     cot: False
@@ -12,7 +13,15 @@ default_experiment:
 experiments:
   er_basic:
     extra_analysis: [correlations]
+  er_basic_llama:
+    model: llama
+    extra_analysis: [correlations]
   er_fewshot:
+    shots: regular
+    crowd_methods: [MajorityVote, Wawa, DawidSkene, GLAD, EBCC, BWA, GoldStandard]
+    extra_analysis: [correlations]
+  er_fewshot_llama:
+    model: llama
     shots: regular
     crowd_methods: [MajorityVote, Wawa, DawidSkene, GLAD, EBCC, BWA, GoldStandard]
     extra_analysis: [correlations]

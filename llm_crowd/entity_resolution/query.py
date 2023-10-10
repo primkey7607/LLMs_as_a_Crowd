@@ -21,6 +21,7 @@ def main(experiment):
     write_responses(
         'entity_resolution',
         experiment,
+        exp_conf['model'],
         datasets,
         prompt_templates,
         examples_func,

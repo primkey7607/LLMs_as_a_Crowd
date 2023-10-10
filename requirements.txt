@@ -1,3 +1,4 @@
+accelerate
 crowd-kit
 numpy
 openai
@@ -6,4 +7,6 @@ pingouin
 pyyaml
 scikit-learn
 scipy
+sentencepiece
 tenacity
+torch
